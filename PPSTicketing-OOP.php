@@ -194,7 +194,9 @@ class PPST extends mysqli
 	}
 	
 	public function get_packedby_name(){
-		$query = "SELECT `name` FROM `tbl_ticketing_packed_by` WHERE `logdel` = '0';";
+		// $query = "SELECT `name` FROM `tbl_ticketing_packed_by` WHERE `logdel` = '0';";
+		$query = "SELECT `name` FROM `tbl_ticketing_packed_by` WHERE `logdel` = '0' ORDER BY `name` ASC";
+
 		return $this->query($query);
 	}
 	
@@ -209,5 +211,62 @@ class PPST extends mysqli
 		return $this->query($query);
 	}
 	
+}
+
+class SDMCMS extends mysqli
+{
+	private static $instance = null;
+	
+	//db connection config variables
+	private $user = "root";	//Username
+	private $pass = "r@p1d0nl1n3"; //Password
+	// private $dbName = "db_pps"; //db_name Note: if you are going to use multiple database just place one here.. use sql to call the other one just in case, for example : database2.tablename
+	private $dbName = "db_stamping_dmcms";
+	private $dbHost = "localhost"; //host
+	
+	//NO NEED TO CHANGE HERE 
+	public static function getInstance() {
+		if(!self::$instance instanceof self)
+		{
+			self::$instance = new self;
+		}
+		return self::$instance;
+	}
+
+	public function __clone()
+	{
+		trigger_error('Clone is not allowed.',E_USER_ERROR);
+	}
+	
+	public function __wakeup()
+	{
+		trigger_error('Deserializing is not allowed.',E_USER_ERROR);
+	}
+	
+	private function __construct() {
+		parent::__construct($this->dbHost, $this->user, $this->pass, $this->dbName);
+		if(mysqli_connect_error())
+		{
+			exit('Connect Error (' . mysqli_connect_errno() . ') ' . mysqli_connect_error());
+		}
+		parent::set_charset('utf-8');
+	}
+
+	////////////////////////////////////UP TO HERE////////////////////////////////////////
+	
+	////////////////////////////////////PUBLIC FUNCTIONS STARTS HERE//////////////////////////////////////////////
+	//ADD A FUNCTION HERE
+	
+	public function select_stamping_data($device_code){
+		// $query = "SELECT * FROM tbl_device WHERE `device_code` = '$device_code' AND `logdel` = 0";
+		$query = $this->query("SELECT * FROM tbl_device WHERE `device_code` = '$device_code' AND `logdel` = 0");
+
+		while($row = mysqli_fetch_array($query)){
+			$result['rev'] = $row['rev'];
+			$result['drawing_no'] = $row['drawing_no'];
+		}
+
+		return $result;
+	}
 }
 ?>

@@ -54,39 +54,55 @@ else {		//for customize printing
 function normalPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDate,$CommentsForVendor,$Qty,$QtyPerBox,$OrderQty,$LotNo,$CommentsForBuyer,$PackingType,$DateComment,$LastUpdate,$Username,$packedby)
 {	
 	if($row = mysqli_fetch_array($query)) {
+		
 		$OrderNo 			= 	$row['OrderNo'];
 		$ProductCode 		= 	$row['ItemCode'];
 		$BarCode			=	$ProductCode . "LOT" . $LotNo;
 		$ProductName 		= 	$row['ItemName'];
-		$DrawingNo 			= 	$row['DrawingNo'];
-		$RevNo 				= 	$row['Rev'];		
+		// $DrawingNo 			= 	$row['DrawingNo'];
+		// $RevNo 				= 	$row['Rev'];		
 		$BuyerChecker 		= 	strtoupper($OrderNo[0].$OrderNo[1]);	//Check the OrderNo first 2 index. 
 		if($BuyerChecker == "PR" || $BuyerChecker == "AD" || $BuyerChecker == "SM" || $BuyerChecker == "TS" || $BuyerChecker == "WH" || $BuyerChecker == "CN") {
 			$Buyer = "PRICON MICROELECTRONICS INC. - (Internal)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
-			// $newfile = './printjob_ts_v2/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
+			// $newfile = './printjob_f3/internal.dd';
 		} else if($BuyerChecker == "PP"){
 			$Buyer = "PRICON MICROELECTRONICS INC. - (TOKAI)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
-			// $newfile = './printjob_ts_v2/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
+			// $newfile = './printjob_f3/internal.dd';
 		}else if($BuyerChecker == "SP"){
 			$Buyer = "PRICON MICROELECTRONICS INC. - (Internal)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
-			// $newfile = './printjob_ts_v2/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
+			// $newfile = './printjob_f3/internal.dd';
 		}else if($BuyerChecker == "RE" && strpos($OrderNo,'PP') !== false){
 			$Buyer = "PRICON MICROELECTRONICS INC. - (TOKAI)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
-			// $newfile = './printjob_ts_v2/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
+			// $newfile = './printjob_f3/internal.dd';
 		}else {
 			$Buyer = "YAMAICHI ELECTRONICS CO., LTD";
-			$newfile = './printjob_ts_v2/scan/external.dd';
-			// $newfile = './printjob_ts_v2/external.dd';
+			$newfile = './printjob_f3/scan/external.dd';
+			// $newfile = './printjob_f3/external.dd';
 		}
 		$Vendor 			= 	"PRICON MICROELECTRONICS INC.";
 		$NumberOfStickers 	= 	ceil($QtyPerBox/$Qty);
 		
 		$DeliveryKeyNo		=	$OrderNo;
 		//VALIDATE VALUES HERE
+		// FOR STAMPING
+		
+		if(isset($_POST['check_stamping'])){
+			// echo $ProductCode;
+			$query_stamping = SDMCMS::getInstance()->select_stamping_data($ProductCode);
+			// print_r( $query_stamping );
+			// echo $query_stamping;
+			$DrawingNo = $query_stamping['drawing_no'];
+			$RevNo = $query_stamping['rev'];
+		}
+		else{
+			$DrawingNo 			= 	$row['DrawingNo'];
+			$RevNo 				= 	$row['Rev'];	
+		}
+		
 		if($OrderQty-$Qty < 0){
 			validate(2,$OrderQty);
 		}else if($Qty == "" || $Qty == "0" || $QtyPerBox == "" || $QtyPerBox == "0"){
@@ -101,9 +117,9 @@ function normalPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDate
 					ini_set('display_errors', 1); 
 					error_reporting(E_ALL);
 
-					$filename = "./printjob_ts_v2/data/data.txt";
+					$filename = "./printjob_f3/data/data.txt";
 					if(!file_exists($filename)){
-						echo "ERROR: the data text file is missing in the printjob_ts_v2/data/ directory";
+						echo "ERROR: the data text file is missing in the printjob_f3/data/ directory";
 					} else{
 						echo "DONE PRINTING";
 					}
@@ -149,9 +165,20 @@ function normalPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDate
 							if($RevNo == ""){
 								$RevNo = "-";
 							}
+
+							
 							$preshipment_data = $DeliveryKeyNo.", ".$ProductCode.", ".$ProductName.", ".$LotNo.", ".$QtyPerBox.", ".$PackingType.", ".$PackageCountDisplay.", ".$DrawingNo.", ".$RevNo;
 
 							$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.";".$CommentsForBuyer.";".$PackageCountDisplay.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";;
+							
+							// if(strpos($DeliveryKeyNo, "TS-WHSE") !== false || strpos($DeliveryKeyNo, "450") !== false){
+							// 	$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.";".$CommentsForBuyer.";".$PackageCountDisplay.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";
+							// }
+							// else{
+							// 	$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.".".$PackageCountDisplay.";".$CommentsForBuyer.";".$PackageCountDisplay.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";
+
+							// }
+							
 						/* } */
 						
 					}
@@ -159,10 +186,10 @@ function normalPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDate
 						fwrite($myfile, $data);
 						fclose($myfile);
 
-						$file = './printjob_ts_v2/startprint.dd';
+						$file = './printjob_f3/startprint.dd';
 						
 						if (!copy($file, $newfile)) {
-							echo "ERROR: the .dd trigger is missing from the printjob_ts_v2 folder";
+							echo "ERROR: the .dd trigger is missing from the printjob_f3 folder";
 						}
 					}
 				}
@@ -170,9 +197,9 @@ function normalPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDate
 				/*ini_set('display_errors', 1); 
 				error_reporting(E_ALL);
 
-				$filename = "./printjob_ts_v2/data/data.txt";
+				$filename = "./printjob_f3/data/data.txt";
 				if(!file_exists($filename)){
-					echo "ERROR: the data text file is missing in the printjob_ts_v2/data/ directory";
+					echo "ERROR: the data text file is missing in the printjob_f3/data/ directory";
 				} else{
 					echo "DONE PRINTING";
 				}
@@ -201,10 +228,10 @@ function normalPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDate
 				fwrite($myfile, $data);
 				fclose($myfile);
 
-				$file = './printjob_ts_v2/startprint.dd';
-				$newfile = './printjob_ts_v2/scan/startprint.dd';
+				$file = './printjob_f3/startprint.dd';
+				$newfile = './printjob_f3/scan/startprint.dd';
 				if (!copy($file, $newfile)) {
-					echo "ERROR: the .dd trigger is missing from the printjob_ts_v2 folder";
+					echo "ERROR: the .dd trigger is missing from the printjob_f3 folder";
 				}
 			*/
 		}
@@ -220,21 +247,21 @@ function dynamicPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDat
 		$ProductCode 		= 	$row['ItemCode'];
 		$BarCode			=	$ProductCode . "LOT" . $LotNo;
 		$ProductName 		= 	$row['ItemName'];
-		$DrawingNo 			= 	$row['DrawingNo'];
-		$RevNo 				= 	$row['Rev'];		
+		// $DrawingNo 			= 	$row['DrawingNo'];
+		// $RevNo 				= 	$row['Rev'];		
 		$BuyerChecker 		= 	strtoupper($OrderNo[0].$OrderNo[1]);	//Check the OrderNo first 2 index. 
 		if($BuyerChecker == "PR" || $BuyerChecker == "AD" || $BuyerChecker == "SM" || $BuyerChecker == "TS" || $BuyerChecker == "WH" || $BuyerChecker == "CN") {	
 			$Buyer = "PRICON MICROELECTRONICS INC. - (Internal)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
 		} else if($BuyerChecker == "PP"){
 			$Buyer = "PRICON MICROELECTRONICS INC. - (TOKAI)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
 		}else if($BuyerChecker == "SP"){
 			$Buyer = "PRICON MICROELECTRONICS INC. - (Internal)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
 		}else {
 			$Buyer = "YAMAICHI ELECTRONICS CO., LTD";
-			$newfile = './printjob_ts_v2/scan/external.dd';
+			$newfile = './printjob_f3/scan/external.dd';
 		}
 		$Vendor 			= 	"PRICON MICROELECTRONICS INC.";
 		$Stickers			=	explode(',',$StickersValue);
@@ -242,6 +269,20 @@ function dynamicPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDat
 		$DeliveryKeyNo		=	$OrderNo;
 		for($x = 0; $x < $NumberOfStickers; $x++) {
 			$QtyPerBox += $Stickers[$x];
+		}
+		// FOR STAMPING
+		
+		if(isset($_POST['check_stamping'])){
+			// echo $ProductCode;
+			$query_stamping = SDMCMS::getInstance()->select_stamping_data($ProductCode);
+			// print_r( $query_stamping );
+			// echo $query_stamping;
+			$DrawingNo = $query_stamping['drawing_no'];
+			$RevNo = $query_stamping['rev'];
+		}
+		else{
+			$DrawingNo 			= 	$row['DrawingNo'];
+			$RevNo 				= 	$row['Rev'];	
 		}
 		
 		//echo "TOTAL".$QtyPerBox;
@@ -257,9 +298,9 @@ function dynamicPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDat
 				ini_set('display_errors', 1); 
 				error_reporting(E_ALL);
 
-				$filename = "./printjob_ts_v2/data/data.txt";
+				$filename = "./printjob_f3/data/data.txt";
 				if(!file_exists($filename)){
-					echo "ERROR: the data text file is missing in the printjob_ts_v2/data/ directory";
+					echo "ERROR: the data text file is missing in the printjob_f3/data/ directory";
 				}else{
 					echo "DONE PRINTING";
 				}
@@ -288,6 +329,14 @@ function dynamicPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDat
 					$preshipment_data = $DeliveryKeyNo.", ".$ProductCode.", ".$ProductName.", ".$LotNo.", ".$QtyPerBox.", ".$PackingType.", ".$PackageCountDisplay.", ".$DrawingNo.", ".$RevNo;
 					
 					$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.";".$CommentsForBuyer.";".$PackageCountDisplay.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";
+					
+					// if(strpos($DeliveryKeyNo, "TS-WHSE") !== false || strpos($DeliveryKeyNo, "450") !== false){
+					// 	$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.";".$CommentsForBuyer.";".$PackageCountDisplay.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";
+					// }
+					// else{
+					// 	$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.".".$PackageCountDisplay.";".$CommentsForBuyer.";".$PackageCountDisplay.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";
+
+					// }
 					//echo $data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.";".$CommentsForBuyer.";".$PackageCountDisplay.";".$PackingType.";\n<br>";
 				}
 				
@@ -295,10 +344,10 @@ function dynamicPrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryDat
 				fwrite($myfile, $data);
 				fclose($myfile);
 
-				$file = './printjob_ts_v2/startprint.dd';
-				$newfile = './printjob_ts_v2/scan/startprint.dd';
+				$file = './printjob_f3/startprint.dd';
+				$newfile = './printjob_f3/scan/startprint.dd';
 				if (!copy($file, $newfile)) {
-					echo "ERROR: the .dd trigger is missing from the printjob_ts_v2 folder";
+					echo "ERROR: the .dd trigger is missing from the printjob_f3 folder";
 				}
 			}
 		}
@@ -313,27 +362,44 @@ function customizePrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryD
 		$ProductCode 		= 	$row['ItemCode'];
 		$BarCode			=	$ProductCode . "LOT" . $LotNo;
 		$ProductName 		= 	$row['ItemName'];
-		$DrawingNo 			= 	$row['DrawingNo'];
-		$RevNo 				= 	$row['Rev'];		
+		// $DrawingNo 			= 	$row['DrawingNo'];
+		// $RevNo 				= 	$row['Rev'];		
 		$BuyerChecker 		= 	strtoupper($OrderNo[0].$OrderNo[1]);	//Check the OrderNo first 2 index. 
 		if($BuyerChecker == "PR" || $BuyerChecker == "AD" || $BuyerChecker == "SM" || $BuyerChecker == "TS" || $BuyerChecker == "WH" || $BuyerChecker == "CN") {	
 			$Buyer = "PRICON MICROELECTRONICS INC. - (Internal)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
 		} else if($BuyerChecker == "SP"){
 			$Buyer = "PRICON MICROELECTRONICS INC. - (Internal)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
 		}else if($BuyerChecker == "PP"){
 			$Buyer = "PRICON MICROELECTRONICS INC. - (TOKAI)";
-			$newfile = './printjob_ts_v2/scan/internal.dd';
+			$newfile = './printjob_f3/scan/internal.dd';
 		}else {
 			$Buyer = "YAMAICHI ELECTRONICS CO., LTD";
-			$newfile = './printjob_ts_v2/scan/external.dd';
+			$newfile = './printjob_f3/scan/external.dd';
 		}
 		$Vendor 			= 	"PRICON MICROELECTRONICS INC.";
 		$Stickers			=	explode(',',$StickersValue);
 		$NumberOfStickers 	= 	count($Stickers);
 		$OnHand				=	$OrderQty -	$Qty;
 		$DeliveryKeyNo		=	$OrderNo;
+
+		// FOR STAMPING
+		
+		if(isset($_POST['check_stamping'])){
+			// echo $ProductCode;
+			$query_stamping = SDMCMS::getInstance()->select_stamping_data($ProductCode);
+			// print_r( $query_stamping );
+			// echo $query_stamping;
+			$DrawingNo = $query_stamping['drawing_no'];
+			$RevNo = $query_stamping['rev'];
+		}
+		else{
+			$DrawingNo 			= 	$row['DrawingNo'];
+			$RevNo 				= 	$row['Rev'];	
+		}
+		
+
 		//VALIDATE VALUES HERE
 		if($NumberOfStickers == 0) {
 			validate(3,'Invalid sticker quantity!');
@@ -342,10 +408,10 @@ function customizePrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryD
 			ini_set('display_errors', 1); 
 			error_reporting(E_ALL);
 
-			$filename = "./printjob_ts_v2/data/data.txt";
-			// $filename = "rapid\www\PPSTicketingSystem_preshipment_version\printjob_ts_v2\data\data.txt";
+			$filename = "./printjob_f3/data/data.txt";
+			// $filename = "rapid\www\PPSTicketingSystem_preshipment_version\printjob_f3\data\data.txt";
 			if(!file_exists($filename)){
-				echo "ERROR: the data text file is missing in the printjob_ts_v2/data/ directory";
+				echo "ERROR: the data text file is missing in the printjob_f3/data/ directory";
 			}else{
 				echo "DONE PRINTING";
 				// echo $RevNo;
@@ -368,17 +434,23 @@ function customizePrinting($query,$TransactionDate,$DeliveryPlaceName,$DeliveryD
 			$preshipment_data = $DeliveryKeyNo.", ".$ProductCode.", ".$ProductName.", ".$LotNo.", ".$TotalQty.", ".$PackingType.", ".$PackageCount.", ".$DrawingNo.", ".$RevNo;
 
 			$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.";".$CommentsForBuyer.";".$PackageCount.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";;
-			
+			// if(strpos($DeliveryKeyNo, "TS-WHSE") !== false || strpos($DeliveryKeyNo, "450") !== false){
+			// 	$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.";".$CommentsForBuyer.";".$PackageCount.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";
+			// }
+			// else{
+			// 	$data .= $Buyer.";".$Vendor.";".$DeliveryPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$QtyDisplay.";".$LotNo.".".$PackageCount.";".$CommentsForBuyer.";".$PackageCount.";".$PackingType.";".$packedby.";".$preshipment_data.";\n";
+
+			// }
 			//$data .= $Buyer.";".$Vendor.";".$DeliverPlaceName.";".$DeliveryDate.";".$DeliveryKeyNo.";".$CommentsForVendor.";".$ProductCode.";".$BarCode.";".$ProductName.";".$DrawingNo.";".$RevNo.";".$Qty.";".$LotNo.";".$CommentsForBuyer.";".$PackageCount.";".$PackingType.";\n";
 			fwrite($myfile, $data);
 			fclose($myfile);
 
-			$file = './printjob_ts_v2/startprint.dd';
+			$file = './printjob_f3/startprint.dd';
 
 
-			// $newfile = './printjob_ts_v2/scan/startprint.dd';
+			// $newfile = './printjob_f3/scan/startprint.dd';
 			if (!copy($file, $newfile)) {
-				echo "ERROR: the .dd trigger is missing from the printjob_ts_v2 folder";
+				echo "ERROR: the .dd trigger is missing from the printjob_f3 folder";
 			}
 		}
 	} else {

@@ -15,7 +15,7 @@ table#tbl_Ticketing tbody tr.selected{
 </head>
 <body>
 <div class="panel panel-primary">
-	<div class="panel-heading">PPS Label Sticker (Ticketing)</div>
+	<div class="panel-heading">F3 Label Sticker (Ticketing)</div>
 	<div class="panel-body">
 		
 		<?php
@@ -219,6 +219,8 @@ table#tbl_Ticketing tbody tr.selected{
 							<label style="width:43%;margin-right:2%;">Total Qty:</label><input onkeypress="return isNumberKey(event);" type="text" id="txtShipQtyCustomize" name="txtShipQtyCustomize" style="width:50%;">
 							<label style="width:43%;margin-right:2%;">Package Count(Example:32/55):</label><input type="text" id="txtPackageCount" name="txtPackageCount" style="width:50%;">
 						</div>
+						<label style="width:43%;margin-right:1.1%;">Stamping</label>
+						<input type="checkbox" id="checkStamping" name="check_stamping" idstyle="width:50%; height:28px;">
 					</div>
 				</div>
 				<div class="modal-footer">
@@ -403,23 +405,46 @@ $('document').ready(function(){
 		});
 	}
 	
+	// function get_packby_list() {
+	// 	$('#cmbPackby').empty();
+	// 	var data = {
+	// 		"action"	: "get_packedby_name_list"
+	// 	}		
+	// 	data = $.param(data);		
+	// 	$.ajax({
+	// 		type	: "post",
+	// 		dataType: "json",
+	// 		data	: data,
+	// 		url		: "./PPSTicketing-Handler.php",
+	// 		success	: function(data){
+	// 			console.log(data);
+	// 			$('#cmbPackby').append(data['html']);
+	// 		}
+	// 	});
+	// }
+
 	function get_packby_list() {
 		$('#cmbPackby').empty();
+		$('#cmbPackby').append('<option value="" selected disabled>--- Select Name ---</option>');
+
 		var data = {
-			"action"	: "get_packedby_name_list"
-		}		
-		data = $.param(data);		
+			"action": "get_packedby_name_list"
+		}
+		data = $.param(data);
+		
 		$.ajax({
-			type	: "post",
+			type: "post",
 			dataType: "json",
-			data	: data,
-			url		: "./PPSTicketing-Handler.php",
-			success	: function(data){
-				console.log(data);
-				$('#cmbPackby').append(data['html']);
+			data: data,
+			url: "./PPSTicketing-Handler.php",
+			success: function(response) {
+				console.log(response);
+				
+				$('#cmbPackby').append(response['html']);
 			}
 		});
 	}
+
 	
 /** Revisions as of Jan 8, 2019 - End **/
 });

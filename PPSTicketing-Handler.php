@@ -130,5 +130,4 @@
 		echo json_encode($return); //json encode since I used a dataType json before passing the serialized values here
 	}
 	
-	
-	?>
+?>

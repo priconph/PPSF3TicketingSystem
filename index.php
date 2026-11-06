@@ -9,7 +9,7 @@ header('Location: ../');
 */
 ?>
 <html>
-<title>PPS Database System</title>
+<title>F3 Ticketing System</title>
 <head>
 <link href="./css/ppsStyleSheet.css" rel="stylesheet">
 <script>
@@ -34,7 +34,7 @@ $('document').ready(function(){
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="./index.php">PPS Ticketing</a>
+      <a class="navbar-brand" href="./index.php">F3 Ticketing System</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->

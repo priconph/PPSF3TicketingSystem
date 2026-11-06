@@ -1,0 +1,57 @@
+# Documents
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.xlsm
+*.csv
+*.ppt
+*.pptx
+
+# Archives
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# Java binaries
+*.jar
+
+# BarTender label designs and backups
+*.btw
+*.btin
+*.tl
+
+# Printjob generated data
+*.dat
+*.dd
+
+# Images / media (large)
+*.psd
+*.bmp
+*.tif
+*.tiff
+*.mp4
+*.avi
+*.mov
+
+# Database / logs / temp
+*.db
+*.sqlite
+*.log
+*.bak
+*.tmp
+~$*
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.lnk
+.vscode/
+.idea/
+
+# Old backups
+olds/
